@@ -12,26 +12,31 @@ class SecondViewController: UIViewController {
     private let gradientLayer = CAGradientLayer()
     private let textLabel = UILabel()
     private let settingWayButton = UIButton(type: .system)
-
+    let vc = FirstViewController()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         backgroundGradientViewSetup()
         labelSetup()
         settingWayButtonSetup()
         
-
+        
     }
     
-//    override func viewDidAppear(_ animated: Bool) {
-//        super.viewDidAppear(animated)
-//        let vc = FirstViewController()
-//        if vc.switchButton.isOn {
-//            print("cdcd")
-//        } else {
-//            vc.modalPresentationStyle = .fullScreen
-//            present(vc, animated: false, completion: nil)
-//        }
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let nc = UNUserNotificationCenter.current()
+        let options: UNAuthorizationOptions = .alert
+        nc.requestAuthorization(options: options) { granted, _ in
+            if granted {
+                DispatchQueue.main.async {
+                    self.vc.modalPresentationStyle = .fullScreen
+                    self.present(self.vc, animated: false, completion: nil)
+                }
+            }
+            guard granted else { return }
+        }
+    }
     
     private func backgroundGradientViewSetup() {
         gradientLayer.frame = view.bounds
@@ -76,12 +81,12 @@ class SecondViewController: UIViewController {
         button.addTarget(self, action: #selector(settingWayButtonTapped), for: .touchUpInside)
         view.addSubview(button)
     }
-
+    
 }
 
 extension SecondViewController {
     @objc private func settingWayButtonTapped() {
-        let vc = FirstViewController()
+        
         print(vc.switchButton.isOn)
         vc.modalTransitionStyle = .flipHorizontal
         vc.modalPresentationStyle = .fullScreen

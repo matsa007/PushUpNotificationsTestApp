@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import UserNotifications
 
 class FirstViewController: UIViewController {
     private let backgroundGradientView = UIView()
@@ -16,6 +17,7 @@ class FirstViewController: UIViewController {
     private let timePicker = UIDatePicker()
     private let titleTextField = UITextField()
     private let subtitleTextField = UITextField()
+    
     
     
     
@@ -51,6 +53,34 @@ class FirstViewController: UIViewController {
     // настройка view переключателя
     private func switchButtonSetup() {
         let button = switchButton
+        let current = UNUserNotificationCenter.current()
+        current.getNotificationSettings(completionHandler: { permission in
+                    switch permission.authorizationStatus  {
+                    case .authorized:
+                        DispatchQueue.main.async {
+                            button.isOn = true
+                        }
+                        print("User granted permission for notification")
+                    case .denied:
+                        DispatchQueue.main.async {
+                            button.isOn = false
+                        }
+                        print("User denied notification permission")
+                    case .notDetermined:
+                        DispatchQueue.main.async {
+                            button.isOn = false
+                        }
+                        print("Notification permission haven't been asked yet")
+                    case .provisional:
+                        // @available(iOS 12.0, *)
+                        print("The application is authorized to post non-interruptive user notifications.")
+                    case .ephemeral:
+                        // @available(iOS 14.0, *)
+                        print("The application is temporarily authorized to post notifications. Only available to app clips.")
+                    @unknown default:
+                        print("Unknow Status")
+                    }
+                })
         button.frame.origin = .init(x: 300, y: 158)
         button.addTarget(self, action: #selector(tapped), for: .valueChanged)
         view.addSubview(button)
@@ -110,6 +140,7 @@ class FirstViewController: UIViewController {
         )
         tf.textAlignment = .left
         tf.textColor = .white
+        tf.tintColor = .white
         view.addSubview(tf)
         NSLayoutConstraint.activate([
             tf.topAnchor.constraint(equalTo: view.topAnchor, constant: 336),
@@ -131,6 +162,7 @@ class FirstViewController: UIViewController {
         )
         tf.textAlignment = .left
         tf.textColor = .white
+        tf.tintColor = .white
         view.addSubview(tf)
         NSLayoutConstraint.activate([
             tf.topAnchor.constraint(equalTo: view.topAnchor, constant: 385),
@@ -139,7 +171,7 @@ class FirstViewController: UIViewController {
             tf.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -48)
         ])
     }
-// функция проверки вкл/выкл кнопки свитча и от этого видимость/невидимость остальных элементов
+    // функция проверки вкл/выкл кнопки свитча и от этого видимость/невидимость остальных элементов
     private func checkForOnOff() {
         if switchButton.isOn {
             timeLabel.isHidden = false
@@ -151,6 +183,16 @@ class FirstViewController: UIViewController {
             timePicker.isHidden = true
             titleTextField.isHidden = true
             subtitleTextField.isHidden = true
+            titleTextField.becomeFirstResponder()
+        }
+    }
+    // функция запроса разрешения на уведомления
+    private func requestNotificationAuthorization() {
+        let nc = UNUserNotificationCenter.current()
+        let options: UNAuthorizationOptions = .alert
+        nc.requestAuthorization(options: options) { granted, _ in
+            print("\(#function) Permission granted: \(granted)")
+            guard granted else { return }
         }
     }
     
@@ -164,13 +206,17 @@ extension FirstViewController {
         checkForOnOff()
         print(timePicker.date)
         
-        //        let value = switchButton.isOn
-        //        let svc = SecondViewController()
-        //        if value {
-        //            present(svc, animated: true, completion: nil)
-        //        } else {
-        //            print("ВЫКЛ")
-        //        }
+        let value = switchButton.isOn
+        let svc = SecondViewController()
+        if value {
+            print("ВКЛ")
+            requestNotificationAuthorization()
+        } else {
+            svc.modalPresentationStyle = .fullScreen
+            svc.modalTransitionStyle = .flipHorizontal
+            present(svc, animated: true, completion: nil)
+            print("ВЫКЛ")
+        }
     }
 }
 
