@@ -22,6 +22,17 @@ class SecondViewController: UIViewController {
 
     }
     
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//        let vc = FirstViewController()
+//        if vc.switchButton.isOn {
+//            print("cdcd")
+//        } else {
+//            vc.modalPresentationStyle = .fullScreen
+//            present(vc, animated: false, completion: nil)
+//        }
+//    }
+    
     private func backgroundGradientViewSetup() {
         gradientLayer.frame = view.bounds
         gradientLayer.startPoint = CGPoint(x: 1, y: 0)
