@@ -30,7 +30,7 @@ class SecondViewController: UIViewController {
             case .authorized:
                 DispatchQueue.main.async {
                     self.vc.modalPresentationStyle = .fullScreen
-                    self.present(self.vc, animated: true, completion: nil)
+                    self.present(self.vc, animated: false, completion: nil)
                 }
                 print("User granted permission for notification")
             case .denied:
