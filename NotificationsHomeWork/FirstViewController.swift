@@ -188,11 +188,12 @@ class FirstViewController: UIViewController {
     }
     // функция запроса разрешения на уведомления
     private func requestNotificationAuthorization() {
-        let nc = UNUserNotificationCenter.current()
         let options: UNAuthorizationOptions = .alert
-        nc.requestAuthorization(options: options) { granted, _ in
-            print("\(#function) Permission granted: \(granted)")
+        UNUserNotificationCenter.current().requestAuthorization(options: [options]) { granted, _ in
             guard granted else { return }
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
         }
     }
     
