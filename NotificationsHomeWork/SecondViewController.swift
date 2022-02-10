@@ -24,18 +24,27 @@ class SecondViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        let nc = UNUserNotificationCenter.current()
-        let options: UNAuthorizationOptions = .alert
-        nc.requestAuthorization(options: options) { granted, _ in
-            if granted {
+        let current = UNUserNotificationCenter.current()
+        current.getNotificationSettings(completionHandler: { permission in
+            switch permission.authorizationStatus  {
+            case .authorized:
                 DispatchQueue.main.async {
                     self.vc.modalPresentationStyle = .fullScreen
-                    self.present(self.vc, animated: false, completion: nil)
+                    self.present(self.vc, animated: true, completion: nil)
                 }
+                print("User granted permission for notification")
+            case .denied:
+                print("User denied notification permission")
+            case .notDetermined:
+                print("Notification permission haven't been asked yet")
+            case .provisional:
+                print("The application is authorized to post non-interruptive user notifications.")
+            case .ephemeral:
+                print("The application is temporarily authorized to post notifications. Only available to app clips.")
+            @unknown default:
+                print("Unknow Status")
             }
-            guard granted else { return }
-        }
+        })
     }
     
     private func backgroundGradientViewSetup() {
