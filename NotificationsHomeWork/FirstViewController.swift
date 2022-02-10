@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  FirstViewController.swift
 //  NotificationsHomeWork
 //
 //  Created by Сергей Матвеенко on 09.02.2022.
@@ -124,7 +124,7 @@ class FirstViewController: UIViewController {
             picker.topAnchor.constraint(equalTo: view.topAnchor, constant: 271),
             picker.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 271),
             picker.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -524),
-            picker.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -36)
+            picker.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -26)
         ])
     }
     // настройка view text field для ввода title для уведомления
@@ -186,7 +186,7 @@ class FirstViewController: UIViewController {
             titleTextField.becomeFirstResponder()
         }
     }
-    // функция запроса разрешения на уведомления
+    // функция запроса разрешения на push уведомления
     private func requestNotificationAuthorization() {
         let options: UNAuthorizationOptions = .alert
         UNUserNotificationCenter.current().requestAuthorization(options: [options]) { granted, _ in

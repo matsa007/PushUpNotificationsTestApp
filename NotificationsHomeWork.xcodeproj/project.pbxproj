@@ -14,6 +14,19 @@
 		4999126627B42670004ECB2C /* SecondViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4999126527B42670004ECB2C /* SecondViewController.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		49C1F55927B5A9DE00756280 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		4999124E27B3E123004ECB2C /* NotificationsHomeWork.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotificationsHomeWork.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4999125127B3E123004ECB2C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -74,6 +87,7 @@
 				4999124A27B3E123004ECB2C /* Sources */,
 				4999124B27B3E123004ECB2C /* Frameworks */,
 				4999124C27B3E123004ECB2C /* Resources */,
+				49C1F55927B5A9DE00756280 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
