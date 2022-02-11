@@ -17,6 +17,11 @@ class FirstViewController: UIViewController {
     private let timePicker = UIDatePicker()
     private let titleTextField = UITextField()
     private let subtitleTextField = UITextField()
+    private let startButton = UIButton()
+    let notificationCenter = UNUserNotificationCenter.current()
+    
+
+        
     
     
     
@@ -30,12 +35,21 @@ class FirstViewController: UIViewController {
         timePickerSetup()
         titleTextFieldSetup()
         subtitleTextFieldSetup()
+        startSetup()
     }
     // проверка на вкл/выкл и соответственно от этого видимость/невидимость остальных элементов
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         checkForOnOff()
+        
+        
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        sendNotifications()
+    }
+     
     //    MARK: - View setup
     //    настройка фона ввиде градиента
     private func backgroundGradientViewSetup() {
@@ -55,32 +69,30 @@ class FirstViewController: UIViewController {
         let button = switchButton
         let current = UNUserNotificationCenter.current()
         current.getNotificationSettings(completionHandler: { permission in
-                    switch permission.authorizationStatus  {
-                    case .authorized:
-                        DispatchQueue.main.async {
-                            button.isOn = true
-                        }
-                        print("User granted permission for notification")
-                    case .denied:
-                        DispatchQueue.main.async {
-                            button.isOn = false
-                        }
-                        print("User denied notification permission")
-                    case .notDetermined:
-                        DispatchQueue.main.async {
-                            button.isOn = false
-                        }
-                        print("Notification permission haven't been asked yet")
-                    case .provisional:
-                        // @available(iOS 12.0, *)
-                        print("The application is authorized to post non-interruptive user notifications.")
-                    case .ephemeral:
-                        // @available(iOS 14.0, *)
-                        print("The application is temporarily authorized to post notifications. Only available to app clips.")
-                    @unknown default:
-                        print("Unknow Status")
-                    }
-                })
+            switch permission.authorizationStatus  {
+            case .authorized:
+                DispatchQueue.main.async {
+                    button.isOn = true
+                }
+                print("*******User granted permission for notification")
+            case .denied:
+                DispatchQueue.main.async {
+                    button.isOn = false
+                }
+                print("User denied notification permission")
+            case .notDetermined:
+                DispatchQueue.main.async {
+                    button.isOn = false
+                }
+                print("Notification permission haven't been asked yet")
+            case .provisional:
+                print("The application is authorized to post non-interruptive user notifications.")
+            case .ephemeral:
+                print("The application is temporarily authorized to post notifications. Only available to app clips.")
+            @unknown default:
+                print("Unknow Status")
+            }
+        })
         button.frame.origin = .init(x: 300, y: 158)
         button.addTarget(self, action: #selector(tapped), for: .valueChanged)
         view.addSubview(button)
@@ -173,6 +185,9 @@ class FirstViewController: UIViewController {
     }
     // функция проверки вкл/выкл кнопки свитча и от этого видимость/невидимость остальных элементов
     private func checkForOnOff() {
+        
+        
+        
         if switchButton.isOn {
             timeLabel.isHidden = false
             timePicker.isHidden = false
@@ -183,18 +198,57 @@ class FirstViewController: UIViewController {
             timePicker.isHidden = true
             titleTextField.isHidden = true
             subtitleTextField.isHidden = true
-            titleTextField.becomeFirstResponder()
         }
     }
+    
+    private func startSetup() {
+        let button = startButton
+        button.frame = .init(x: view.center.x - 50, y: 450, width: 100, height: 100)
+        button.setTitle("Start", for: .normal)
+        button.backgroundColor = .blue
+        button.addTarget(self, action: #selector(sendNotifications), for: .touchUpInside)
+        view.addSubview(button)
+    }
+    
+    
+    
+    
     // функция запроса разрешения на push уведомления
     private func requestNotificationAuthorization() {
-        let options: UNAuthorizationOptions = .alert
-        UNUserNotificationCenter.current().requestAuthorization(options: [options]) { granted, _ in
+        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             guard granted else { return }
-            DispatchQueue.main.async {
-                UIApplication.shared.registerForRemoteNotifications()
+            self.notificationCenter.getNotificationSettings { (settings) in
+                guard settings.authorizationStatus == .authorized else { return }
             }
         }
+    }
+    
+    @objc func sendNotifications() {
+        print("VKL UOUOUOUOU")
+        print(timePicker.date)
+        let content = UNMutableNotificationContent()
+        content.title = titleTextField.text ?? "Title isn't entered"
+        content.subtitle = subtitleTextField.text ?? "Subtitle isn't entered"
+        content.body = "Congratulations for Sergey 🙂"
+        content.sound = UNNotificationSound.default
+        
+        let dateFromPicker = timePicker.date
+        var date = DateComponents()
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: dateFromPicker)
+        date.year = components.year
+        date.month = components.month
+        date.day = components.day
+        date.hour = components.hour
+        date.minute = components.minute
+        date.second = components.second
+        let triggerh = UNCalendarNotificationTrigger(dateMatching: date, repeats: false)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+        
+        let request = UNNotificationRequest(identifier: "notificationtesthw", content: content, trigger: trigger)
+        notificationCenter.add(request) { (error) in
+            return
+        }
+        
     }
     
     

@@ -24,25 +24,14 @@ class SecondViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         let current = UNUserNotificationCenter.current()
-        current.getNotificationSettings(completionHandler: { permission in
-            switch permission.authorizationStatus  {
-            case .authorized:
+        current.getNotificationSettings(completionHandler: { status in
+            if status.authorizationStatus == .authorized {
                 DispatchQueue.main.async {
                     self.vc.modalPresentationStyle = .fullScreen
                     self.present(self.vc, animated: false, completion: nil)
                 }
-                print("User granted permission for notification")
-            case .denied:
-                print("User denied notification permission")
-            case .notDetermined:
-                print("Notification permission haven't been asked yet")
-            case .provisional:
-                print("The application is authorized to post non-interruptive user notifications.")
-            case .ephemeral:
-                print("The application is temporarily authorized to post notifications. Only available to app clips.")
-            @unknown default:
-                print("Unknow Status")
             }
         })
     }
@@ -95,8 +84,6 @@ class SecondViewController: UIViewController {
 
 extension SecondViewController {
     @objc private func settingWayButtonTapped() {
-        
-        print(vc.switchButton.isOn)
         vc.modalTransitionStyle = .flipHorizontal
         vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true, completion: nil)
