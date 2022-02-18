@@ -8,139 +8,211 @@
 import UIKit
 import UserNotifications
 
-class FirstViewController: UIViewController {
-    private let backgroundGradientView = UIView()
-    private let gradientLayer = CAGradientLayer()
+class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
+    let authorizedBackgroundGradientView = UIView()
+    let unAuthorizedBackgroundGradientView = UIView()
+    let authorizedView = UIView()
+    let unAuthorizedView = UIView()
+    let authorizedGradientLayer = CAGradientLayer()
+    let unAuthorizedGradientLayer = CAGradientLayer()
+    let switchLabel = UILabel()
     let switchButton = UISwitch()
-    private let switchLabel = UILabel()
-    private let timeLabel = UILabel()
-    private let timePicker = UIDatePicker()
-    private let titleTextField = UITextField()
-    private let subtitleTextField = UITextField()
-    private let startButton = UIButton()
-    let notificationCenter = UNUserNotificationCenter.current()
-    
-
-        
-    
-    
-    
+    let timeLabel = UILabel()
+    let timePicker = UIDatePicker()
+    let titleTextField = UITextField()
+    let subtitleTextField = UITextField()
+    let applyButton = UIButton(type: .system)
+    let textLabel = UILabel()
+    let settingWayButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        backgroundGradientViewSetup()
-        switchButtonSetup()
+        unAuthorizedViewSetup()
+        authorizedViewSetup()
+        UNUserNotificationCenter.current().delegate = self
+        hideKeyboardWhenTappedAround()
+    }
+    
+    func authorizedViewSetup() {
+        let aView = authorizedView
+        aView.frame = view.bounds
+        view.addSubview(aView)
+        authorisedBackgroundGradientViewSetup()
         switchLabelSetup()
+        switchButtonSetup()
         timeLabelSetup()
         timePickerSetup()
         titleTextFieldSetup()
         subtitleTextFieldSetup()
-        startSetup()
+        applyButtonSetup()
     }
-    // проверка на вкл/выкл и соответственно от этого видимость/невидимость остальных элементов
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        checkForOnOff()
-        
+    
+    func unAuthorizedViewSetup() {
+        let unView = unAuthorizedView
+        unView.frame = view.bounds
+        view.addSubview(unView)
+        unAuthorisedBackgroundGradientViewSetup()
+        labelSetup()
+        settingWayButtonSetup()
         
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        sendNotifications()
-    }
-     
     //    MARK: - View setup
     //    настройка фона ввиде градиента
-    private func backgroundGradientViewSetup() {
-        gradientLayer.frame = view.bounds
-        gradientLayer.startPoint = CGPoint(x: 1, y: 0)
-        gradientLayer.endPoint = CGPoint(x: 0, y: 1)
-        gradientLayer.colors = [
+    func authorisedBackgroundGradientViewSetup() {
+        authorizedGradientLayer.frame = view.bounds
+        authorizedGradientLayer.startPoint = CGPoint(x: 1, y: 0)
+        authorizedGradientLayer.endPoint = CGPoint(x: 0, y: 1)
+        authorizedGradientLayer.colors = [
             UIColor(red: 11/255, green: 15/255, blue: 50/255, alpha: 1).cgColor,
             UIColor(red: 165/255, green: 8/255, blue: 132/255, alpha: 1).cgColor
         ]
-        gradientLayer.shouldRasterize = true
-        backgroundGradientView.layer.addSublayer(gradientLayer)
-        view.addSubview(backgroundGradientView)
+        authorizedGradientLayer.shouldRasterize = true
+        authorizedBackgroundGradientView.layer.addSublayer(authorizedGradientLayer)
+        authorizedView.addSubview(authorizedBackgroundGradientView)
     }
-    // настройка view переключателя
-    private func switchButtonSetup() {
-        let button = switchButton
-        let current = UNUserNotificationCenter.current()
-        current.getNotificationSettings(completionHandler: { permission in
-            switch permission.authorizationStatus  {
-            case .authorized:
-                DispatchQueue.main.async {
-                    button.isOn = true
-                }
-                print("*******User granted permission for notification")
-            case .denied:
-                DispatchQueue.main.async {
-                    button.isOn = false
-                }
-                print("User denied notification permission")
-            case .notDetermined:
-                DispatchQueue.main.async {
-                    button.isOn = false
-                }
-                print("Notification permission haven't been asked yet")
-            case .provisional:
-                print("The application is authorized to post non-interruptive user notifications.")
-            case .ephemeral:
-                print("The application is temporarily authorized to post notifications. Only available to app clips.")
-            @unknown default:
-                print("Unknow Status")
-            }
-        })
-        button.frame.origin = .init(x: 300, y: 158)
-        button.addTarget(self, action: #selector(tapped), for: .valueChanged)
-        view.addSubview(button)
+    
+    func unAuthorisedBackgroundGradientViewSetup () {
+        unAuthorizedGradientLayer.frame = view.bounds
+        unAuthorizedGradientLayer.startPoint = CGPoint(x: 1, y: 0)
+        unAuthorizedGradientLayer.endPoint = CGPoint(x: 0, y: 1)
+        unAuthorizedGradientLayer.colors = [
+            UIColor(red: 11/255, green: 15/255, blue: 50/255, alpha: 1).cgColor,
+            UIColor(red: 165/255, green: 8/255, blue: 132/255, alpha: 1).cgColor
+        ]
+        unAuthorizedGradientLayer.shouldRasterize = true
+        unAuthorizedBackgroundGradientView.layer.addSublayer(unAuthorizedGradientLayer)
+        unAuthorizedView.addSubview(unAuthorizedBackgroundGradientView)
     }
-    // настройка view лейбы переключателя Allow Notifications
-    private func switchLabelSetup() {
-        let label = switchLabel
-        label.frame.size = .init(width: 189, height: 29)
-        label.frame.origin = .init(x: 48, y: switchButton.frame.origin.y)
+    
+    func labelSetup() {
+        let label = textLabel
+        label.text = "Notifications are disabled. Please enable them in settings"
+        label.adjustsFontSizeToFitWidth = true
         label.textColor = .white
+        label.font = .systemFont(ofSize: 24)
+        label.textAlignment = .center
+        label.frame.size = .init(width: 286, height: 87)
+        label.frame.origin = .init(x: (view.frame.width/2 - label.frame.width/2), y: (view.frame.height/2 - label.frame.height/2))
+        label.lineBreakMode = .byWordWrapping
+        label.numberOfLines = 3
+        unAuthorizedView.addSubview(label)
+    }
+    
+    func settingWayButtonSetup() {
+        let button = settingWayButton
+        button.frame.size = .init(width: 297, height: 59)
+        button.frame.origin = .init(x: (textLabel.frame.origin.x), y: (textLabel.frame.origin.y + textLabel.frame.height/2 + button.frame.height/2 + 66))
+        button.clipsToBounds = true
+        button.layer.cornerRadius = 30
+        button.backgroundColor = .black
+        button.attributedTitle(for: .normal)
+        button.tintColor = .white
+        button.titleLabel?.font = .systemFont(ofSize: 21)
+        button.titleLabel?.lineBreakMode = .byWordWrapping
+        button.titleLabel?.textAlignment = .center
+        button.setTitle("Open\nSettings", for: .normal)
+        button.addTarget(self, action: #selector(settingWayButtonTapped), for: .touchUpInside)
+        unAuthorizedView.addSubview(button)
+    }
+    
+    // настройка view лейбы переключателя Allow Notifications
+    func switchLabelSetup() {
+        let label = switchLabel
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .white
+        label.backgroundColor = .clear
         label.text = "Allow Notifications"
         label.font = .systemFont(ofSize: 24)
         label.adjustsFontSizeToFitWidth = true
-        view.addSubview(label)
+        authorizedView.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: view.topAnchor, constant: 100),
+            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            label.bottomAnchor.constraint(equalTo: view.topAnchor, constant: 150),
+            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -150)
+        ])
     }
+    
+    // настройка view переключателя
+    func switchButtonSetup() {
+        let button = switchButton
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(switchButtonTapped), for: .valueChanged)
+        authorizedView.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.centerYAnchor.constraint(equalTo: switchLabel.centerYAnchor),
+            button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+        ])
+    }
+    
+    //    private func checkForAuthorization() {
+    //        notificationCenter.getNotificationSettings(completionHandler: { permission in
+    //            switch permission.authorizationStatus  {
+    //            case .authorized:
+    //                DispatchQueue.main.async {
+    //                    self.unAuthorizedView.isHidden = true
+    //                    self.authorizedView.isHidden = false
+    //
+    //                }
+    //                print("*******User granted permission for notification")
+    //            case .denied:
+    //                DispatchQueue.main.async {
+    //                    self.unAuthorizedView.isHidden = false
+    //                    self.authorizedView.isHidden = true
+    //                }
+    //                print("User denied notification permission")
+    //            case .notDetermined:
+    //                DispatchQueue.main.async {
+    //                    self.authorizedView.isHidden = false
+    //                    self.unAuthorizedView.isHidden = true
+    //
+    //                }
+    //                print("Notification permission haven't been asked yet")
+    //            case .provisional:
+    //                print("The application is authorized to post non-interruptive user notifications.")
+    //            case .ephemeral:
+    //                print("The application is temporarily authorized to post notifications. Only available to app clips.")
+    //            @unknown default:
+    //                print("Unknow Status")
+    //            }
+    //        })
+    //    }
+    
     // настройка view лейбы Notification Time
-    private func timeLabelSetup() {
+    func timeLabelSetup() {
         let label = timeLabel
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.backgroundColor = .clear
         label.text = "Notification Time"
         label.font = .systemFont(ofSize: 24)
         label.textColor = .white
-        view.addSubview(label)
+        authorizedView.addSubview(label)
         NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: view.topAnchor, constant: 266),
-            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 48),
-            label.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -517),
-            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -155)
+            label.topAnchor.constraint(equalTo: switchLabel.topAnchor, constant: 70),
+            label.leadingAnchor.constraint(equalTo: switchLabel.leadingAnchor),
+            label.bottomAnchor.constraint(equalTo: switchLabel.bottomAnchor, constant: 70),
+            label.trailingAnchor.constraint(equalTo: switchLabel.trailingAnchor)
         ])
     }
+    
     // настройка view ввода времени
-    private func timePickerSetup() {
+    func timePickerSetup() {
         let picker = timePicker
         picker.translatesAutoresizingMaskIntoConstraints = false
         picker.datePickerMode = .time
-        picker.backgroundColor = .white
-        picker.layer.borderWidth = 10
-        picker.layer.borderColor = .init(red: 1, green: 1, blue: 1, alpha: 1)
-        view.addSubview(picker)
+        picker.backgroundColor = .clear
+        picker.locale = .init(identifier: "ru_RU")
+        authorizedView.addSubview(picker)
         NSLayoutConstraint.activate([
-            picker.topAnchor.constraint(equalTo: view.topAnchor, constant: 271),
-            picker.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 271),
-            picker.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -524),
-            picker.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -26)
+            picker.topAnchor.constraint(equalTo: timeLabel.topAnchor),
+            picker.leadingAnchor.constraint(equalTo: timeLabel.trailingAnchor, constant: 50),
+            picker.bottomAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 0),
+            picker.trailingAnchor.constraint(equalTo: switchButton.trailingAnchor, constant: 0)
         ])
     }
     // настройка view text field для ввода title для уведомления
-    private func titleTextFieldSetup() {
+    func titleTextFieldSetup() {
         let tf = titleTextField
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.backgroundColor = .clear
@@ -153,16 +225,17 @@ class FirstViewController: UIViewController {
         tf.textAlignment = .left
         tf.textColor = .white
         tf.tintColor = .white
-        view.addSubview(tf)
+        authorizedView.addSubview(tf)
         NSLayoutConstraint.activate([
-            tf.topAnchor.constraint(equalTo: view.topAnchor, constant: 336),
-            tf.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 48),
-            tf.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -447),
-            tf.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -48)
+            tf.topAnchor.constraint(equalTo: switchLabel.topAnchor, constant: 170),
+            tf.leadingAnchor.constraint(equalTo: switchLabel.leadingAnchor),
+            tf.bottomAnchor.constraint(equalTo: switchLabel.bottomAnchor, constant: 170),
+            tf.trailingAnchor.constraint(equalTo: timePicker.trailingAnchor)
         ])
     }
+    
     // настройка view text field для ввода subtitle для уведомления
-    private func subtitleTextFieldSetup() {
+    func subtitleTextFieldSetup() {
         let tf = subtitleTextField
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.backgroundColor = .clear
@@ -175,103 +248,124 @@ class FirstViewController: UIViewController {
         tf.textAlignment = .left
         tf.textColor = .white
         tf.tintColor = .white
-        view.addSubview(tf)
+        authorizedView.addSubview(tf)
         NSLayoutConstraint.activate([
-            tf.topAnchor.constraint(equalTo: view.topAnchor, constant: 385),
-            tf.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 48),
-            tf.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -398),
-            tf.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -48)
+            tf.topAnchor.constraint(equalTo: switchLabel.topAnchor, constant: 240),
+            tf.leadingAnchor.constraint(equalTo: switchLabel.leadingAnchor),
+            tf.bottomAnchor.constraint(equalTo: switchLabel.bottomAnchor, constant: 240),
+            tf.trailingAnchor.constraint(equalTo: timePicker.trailingAnchor)
         ])
     }
+    
+    func applyButtonSetup() {
+        let button = applyButton
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Apply", for: .normal)
+        button.backgroundColor = .clear
+        button.tintColor = .systemGreen
+        button.titleLabel?.font = .systemFont(ofSize: 24)
+        button.addTarget(self, action: #selector(applyButtonTapped), for: .touchUpInside)
+        authorizedView.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: view.bottomAnchor, constant: -150),
+            button.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 150),
+            button.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
+            button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -150)
+        ])
+    }
+    
     // функция проверки вкл/выкл кнопки свитча и от этого видимость/невидимость остальных элементов
-    private func checkForOnOff() {
-        
-        
-        
-        if switchButton.isOn {
-            timeLabel.isHidden = false
-            timePicker.isHidden = false
-            titleTextField.isHidden = false
-            subtitleTextField.isHidden = false
-        } else {
-            timeLabel.isHidden = true
-            timePicker.isHidden = true
-            titleTextField.isHidden = true
-            subtitleTextField.isHidden = true
-        }
-    }
     
-    private func startSetup() {
-        let button = startButton
-        button.frame = .init(x: view.center.x - 50, y: 450, width: 100, height: 100)
-        button.setTitle("Start", for: .normal)
-        button.backgroundColor = .blue
-        button.addTarget(self, action: #selector(sendNotifications), for: .touchUpInside)
-        view.addSubview(button)
-    }
-    
-    
-    
+    //    private func checkForOnOff() {
+    //
+    //
+    //
+    //        if switchButton.isOn {
+    //            timeLabel.isHidden = false
+    //            timePicker.isHidden = false
+    //            titleTextField.isHidden = false
+    //            subtitleTextField.isHidden = false
+    //        } else {
+    //            timeLabel.isHidden = true
+    //            timePicker.isHidden = true
+    //            titleTextField.isHidden = true
+    //            subtitleTextField.isHidden = true
+    //        }
+    //    }
     
     // функция запроса разрешения на push уведомления
-    private func requestNotificationAuthorization() {
-        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            guard granted else { return }
-            self.notificationCenter.getNotificationSettings { (settings) in
-                guard settings.authorizationStatus == .authorized else { return }
-            }
-        }
+    
+    
+    @objc func applyButtonTapped() {
+        print("VKL")
+        print(timePicker.date)
+        let notifManger = NotificationManager()
+        notifManger.alarmDate = timePicker.date
+        notifManger.applyNotification()
     }
     
-    @objc func sendNotifications() {
-        print("VKL UOUOUOUOU")
-        print(timePicker.date)
-        let content = UNMutableNotificationContent()
-        content.title = titleTextField.text ?? "Title isn't entered"
-        content.subtitle = subtitleTextField.text ?? "Subtitle isn't entered"
-        content.body = "Congratulations for Sergey 🙂"
-        content.sound = UNNotificationSound.default
-        
-        let dateFromPicker = timePicker.date
-        var date = DateComponents()
-        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: dateFromPicker)
-        date.year = components.year
-        date.month = components.month
-        date.day = components.day
-        date.hour = components.hour
-        date.minute = components.minute
-        date.second = components.second
-        let triggerh = UNCalendarNotificationTrigger(dateMatching: date, repeats: false)
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-        
-        let request = UNNotificationRequest(identifier: "notificationtesthw", content: content, trigger: trigger)
-        notificationCenter.add(request) { (error) in
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.sound, .banner, .badge])
+        print(#function )
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        applyButton.tintColor = .red
+        print(#function )
+    }
+    
+    // жест tap на вьюхе который дергает функцию dismissKeyboard() для убора клавиатуры
+    func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    // убирает клавиатуру
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    //    переход в настройки приложения в телефоне
+    @objc func settingWayButtonTapped() {
+        guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
             return
         }
-        
+        if UIApplication.shared.canOpenURL(settingsUrl) {
+            UIApplication.shared.open(settingsUrl, completionHandler: nil)
+        }
     }
     
     
-}
-
-extension FirstViewController {
+    
     //    MARK: - IBActions
     // функция вызываемая при нажатии на свитч
-    @objc func tapped() {
-        checkForOnOff()
-        print(timePicker.date)
+    @objc func switchButtonTapped() {
+        //        checkForOnOff()
+        let nm = NotificationManager()
+        nm.requestNotificationAuthorization()
         
-        let value = switchButton.isOn
-        let svc = SecondViewController()
-        if value {
-            print("ВКЛ")
-            requestNotificationAuthorization()
-        } else {
-            svc.modalPresentationStyle = .fullScreen
-            svc.modalTransitionStyle = .flipHorizontal
-            present(svc, animated: true, completion: nil)
-            print("ВЫКЛ")
-        }
+        //        let value = switchButton.isOn
+        //        let svc = SecondViewController()
+        //        if value {
+        //            print("ВКЛ")
+        //            requestNotificationAuthorization()
+        //        } else {
+        //            svc.modalPresentationStyle = .fullScreen
+        //            svc.modalTransitionStyle = .flipHorizontal
+        //            present(svc, animated: true, completion: nil)
+        //            print("ВЫКЛ")
+        //        }
+    }
+}
+
+
+// in Apply
+extension UIView {
+    func shake() {
+        let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
+        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+        animation.duration = 0.6
+        animation.values = [-20.0, 20.0, -20.0, 20.0, -10.0, 10.0, -5.0, 5.0, 0.0 ]
+        layer.add(animation, forKey: "shake")
     }
 }
 
