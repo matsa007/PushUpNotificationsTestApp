@@ -11,7 +11,29 @@ import UIKit
 
 class NotificationManager {
     let notificationCenter = UNUserNotificationCenter.current()
+    let defaults = UserDefaults.standard
     var alarmDate = Date()
+    var titleText: String? {
+        set {
+            defaults.set(newValue, forKey: "Title")
+                }
+                get {
+                    print("bfdvdvdfv")
+                   return defaults.object(forKey: "Title") as? String
+                    
+                }
+        
+    }
+    var subtitleText: String? {
+        set {
+                    defaults.set(newValue, forKey: "Subtitle")
+                }
+                get {
+                    defaults.object(forKey: "Subtitle") as? String
+                }
+        
+    }
+    
     let fvc = FirstViewController()
     
     func requestNotificationAuthorization() {
@@ -32,8 +54,9 @@ class NotificationManager {
             switch permission.authorizationStatus  {
             case .authorized:
                 DispatchQueue.main.async {
-                    self.fvc.unAuthorizedView.isHidden = true
-                    self.fvc.authorizedView.isHidden = false
+                    self.fvc.unAuthorizedView.isHidden = false
+                    self.fvc.authorizedView.isHidden = true
+                    print("1111112222")
                     
                 }
                 print("*******User granted permission for notification")
@@ -68,8 +91,8 @@ class NotificationManager {
         print(fvc.timePicker.date)
         print("alarm date \(alarmDate)")
         let content = UNMutableNotificationContent()
-        content.title = fvc.titleTextField.text ?? "Title isn't entered"
-        content.subtitle = fvc.subtitleTextField.text ?? "Subtitle isn't entered"
+        content.title = titleText ?? "No Title"
+        content.subtitle = subtitleText ?? "No Subtitle"
         content.body = "Congratulations for Sergey 🙂"
         content.sound = UNNotificationSound.defaultRingtone
         let dateFromPicker = alarmDate

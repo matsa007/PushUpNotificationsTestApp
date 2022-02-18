@@ -33,6 +33,38 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         hideKeyboardWhenTappedAround()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        UNUserNotificationCenter.current().getNotificationSettings(completionHandler: { permission in
+            switch permission.authorizationStatus  {
+            case .authorized:
+                DispatchQueue.main.async {
+                    self.unAuthorizedView.isHidden = true
+                    self.authorizedView.isHidden = false
+                }
+                print("User granted permission for notification")
+            case .denied:
+                DispatchQueue.main.async {
+                    self.unAuthorizedView.isHidden = false
+                    self.authorizedView.isHidden = true
+                }
+                print("User denied notification permission")
+            case .notDetermined:
+                DispatchQueue.main.async {
+                    self.authorizedView.isHidden = false
+                    self.unAuthorizedView.isHidden = true
+                }
+                print("Notification permission haven't been asked yet")
+            case .provisional:
+                print("The application is authorized to post non-interruptive user notifications.")
+            case .ephemeral:
+                print("The application is temporarily authorized to post notifications. Only available to app clips.")
+            @unknown default:
+                print("Unknow Status")
+            }
+        })
+    }
+    
     func authorizedViewSetup() {
         let aView = authorizedView
         aView.frame = view.bounds
@@ -298,26 +330,27 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     
     
     @objc func applyButtonTapped() {
-        print("VKL")
-        print(timePicker.date)
+        // включение оповещения
         let notificationManger = NotificationManager()
         notificationManger.alarmDate = timePicker.date
+        notificationManger.titleText = titleTextField.text ?? "Title not entered"
+        notificationManger.subtitleText = subtitleTextField.text ?? "Subtitle not entered"
         notificationManger.applyNotification()
-        
-        if ((titleTextField.text?.isEmpty) != nil) {
+//        проверка на пустые поля
+        if titleTextField.text!.isEmpty {
             titleTextField.shake()
         }
         
-        if ((subtitleTextField.text?.isEmpty) != nil) {
+        if subtitleTextField.text!.isEmpty {
             subtitleTextField.shake()
         }
     }
-//  срабатывает перед уведомлением
+    //  срабатывает перед уведомлением
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.sound, .banner, .badge])
         print(#function )
     }
-//  срабатывает при нажатии на уведомление
+    //  срабатывает при нажатии на уведомление
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         applyButton.tintColor = .red
         print(#function )
