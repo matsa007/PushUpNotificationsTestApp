@@ -218,6 +218,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         tf.backgroundColor = .clear
         tf.clearButtonMode = .whileEditing
         tf.font = .systemFont(ofSize: 24)
+        tf.borderStyle = .line
         tf.attributedPlaceholder = NSAttributedString(
             string: "Enter Title Text ...",
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 24)]
@@ -299,16 +300,24 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     @objc func applyButtonTapped() {
         print("VKL")
         print(timePicker.date)
-        let notifManger = NotificationManager()
-        notifManger.alarmDate = timePicker.date
-        notifManger.applyNotification()
+        let notificationManger = NotificationManager()
+        notificationManger.alarmDate = timePicker.date
+        notificationManger.applyNotification()
+        
+        if ((titleTextField.text?.isEmpty) != nil) {
+            titleTextField.shake()
+        }
+        
+        if ((subtitleTextField.text?.isEmpty) != nil) {
+            subtitleTextField.shake()
+        }
     }
-    
+//  срабатывает перед уведомлением
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.sound, .banner, .badge])
         print(#function )
     }
-    
+//  срабатывает при нажатии на уведомление
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         applyButton.tintColor = .red
         print(#function )
@@ -324,6 +333,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     @objc func dismissKeyboard() {
         view.endEditing(true)
     }
+    
     //    переход в настройки приложения в телефоне
     @objc func settingWayButtonTapped() {
         guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
@@ -340,8 +350,8 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     // функция вызываемая при нажатии на свитч
     @objc func switchButtonTapped() {
         //        checkForOnOff()
-        let nm = NotificationManager()
-        nm.requestNotificationAuthorization()
+        let notificationManager = NotificationManager()
+        notificationManager.requestNotificationAuthorization()
         
         //        let value = switchButton.isOn
         //        let svc = SecondViewController()
@@ -359,6 +369,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
 
 
 // in Apply
+// функция анимации "перетряхивания" объекта
 extension UIView {
     func shake() {
         let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
