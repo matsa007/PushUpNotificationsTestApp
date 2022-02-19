@@ -6,4 +6,11 @@
   
 */
 
-"apply_button" = "Applie";
+
+"notification_label" = "Benachrichtigungen sind deaktiviert. Bitte aktivieren Sie sie in den Einstellungen";
+"setup_button" = "Einstellungen\nÖffnen";
+"switch_label" = "Benachrichtigungen zulassen";
+"time_label" = "Benachrichtigungszeit";
+"title_placeholder" = "Titeltext eingeben ... ";
+"subtitle_placeholder" = "Untertiteltext eingeben ...";
+"apply_button" = "Anwenden";

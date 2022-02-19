@@ -27,8 +27,8 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        unAuthorizedViewSetup()
         authorizedViewSetup()
+        unAuthorizedViewSetup()
         UNUserNotificationCenter.current().delegate = self
         hideKeyboardWhenTappedAround()
     }
@@ -119,7 +119,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     
     func labelSetup() {
         let label = textLabel
-        label.text = "Notifications are disabled. Please enable them in settings"
+        label.text = String(localized: "notification_label")
         label.adjustsFontSizeToFitWidth = true
         label.textColor = .white
         label.font = .systemFont(ofSize: 24)
@@ -143,7 +143,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         button.titleLabel?.font = .systemFont(ofSize: 21)
         button.titleLabel?.lineBreakMode = .byWordWrapping
         button.titleLabel?.textAlignment = .center
-        button.setTitle("Open\nSettings", for: .normal)
+        button.setTitle(String(localized: "setup_button"), for: .normal)
         button.addTarget(self, action: #selector(settingWayButtonTapped), for: .touchUpInside)
         unAuthorizedView.addSubview(button)
     }
@@ -154,7 +154,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = .white
         label.backgroundColor = .clear
-        label.text = "Allow Notifications"
+        label.text = String(localized: "switch_label")
         label.font = .systemFont(ofSize: 24)
         label.adjustsFontSizeToFitWidth = true
         authorizedView.addSubview(label)
@@ -216,7 +216,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         let label = timeLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         label.backgroundColor = .clear
-        label.text = "Notification Time"
+        label.text = String(localized: "time_label")
         label.font = .systemFont(ofSize: 24)
         label.textColor = .white
         authorizedView.addSubview(label)
@@ -250,9 +250,8 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         tf.backgroundColor = .clear
         tf.clearButtonMode = .whileEditing
         tf.font = .systemFont(ofSize: 24)
-        tf.borderStyle = .line
         tf.attributedPlaceholder = NSAttributedString(
-            string: "Enter Title Text ...",
+            string: String(localized: "title_placeholder"),
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 24)]
         )
         tf.textAlignment = .left
@@ -275,7 +274,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         tf.clearButtonMode = .whileEditing
         tf.font = .systemFont(ofSize: 24)
         tf.attributedPlaceholder = NSAttributedString(
-            string: "Enter Subtitle Text ...",
+            string: String(localized: "subtitle_placeholder"),
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 24)]
         )
         tf.textAlignment = .left
@@ -293,11 +292,11 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     func applyButtonSetup() {
         let button = applyButton
         button.translatesAutoresizingMaskIntoConstraints = false
-//        button.setTitle(String(localized: String.LocalizationValue, table: <#T##String?#>, bundle: button.bounds, locale: "En", comment: ""), for: .normal)
         button.setTitle(String(localized: "apply_button"), for: .normal)
         button.backgroundColor = .clear
         button.tintColor = .systemGreen
-        button.titleLabel?.font = .systemFont(ofSize: 24)
+        button.titleLabel?.font = .systemFont(ofSize: 25)
+        button.titleLabel?.adjustsFontSizeToFitWidth = true
         button.addTarget(self, action: #selector(applyButtonTapped), for: .touchUpInside)
         authorizedView.addSubview(button)
         NSLayoutConstraint.activate([

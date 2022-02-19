@@ -6,4 +6,10 @@
   
 */
 
+"notification_label" = "Notifications are disabled. Please enable them in settings";
+"setup_button" = "Open\nSettings";
+"switch_label" = "Allow Notifications";
+"time_label" = "Notification Time";
+"title_placeholder" = "Enter Title Text ...";
+"subtitle_placeholder" = "Enter Subtitle Text ...";
 "apply_button" = "Apply";
