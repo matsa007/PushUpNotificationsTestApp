@@ -16,21 +16,20 @@ class NotificationManager {
     var titleText: String? {
         set {
             defaults.set(newValue, forKey: "Title")
-                }
-                get {
-                    print("bfdvdvdfv")
-                   return defaults.object(forKey: "Title") as? String
-                    
-                }
+        }
+        get {
+            defaults.object(forKey: "Title") as? String
+            
+        }
         
     }
     var subtitleText: String? {
         set {
-                    defaults.set(newValue, forKey: "Subtitle")
-                }
-                get {
-                    defaults.object(forKey: "Subtitle") as? String
-                }
+            defaults.set(newValue, forKey: "Subtitle")
+        }
+        get {
+            defaults.object(forKey: "Subtitle") as? String
+        }
         
     }
     

@@ -293,7 +293,8 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     func applyButtonSetup() {
         let button = applyButton
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Apply", for: .normal)
+//        button.setTitle(String(localized: String.LocalizationValue, table: <#T##String?#>, bundle: button.bounds, locale: "En", comment: ""), for: .normal)
+        button.setTitle(String(localized: "apply_button"), for: .normal)
         button.backgroundColor = .clear
         button.tintColor = .systemGreen
         button.titleLabel?.font = .systemFont(ofSize: 24)
