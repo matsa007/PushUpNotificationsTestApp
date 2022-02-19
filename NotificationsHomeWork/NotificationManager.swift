@@ -19,7 +19,6 @@ class NotificationManager {
         }
         get {
             defaults.object(forKey: "Title") as? String
-            
         }
         
     }
@@ -30,7 +29,6 @@ class NotificationManager {
         get {
             defaults.object(forKey: "Subtitle") as? String
         }
-        
     }
     
     let fvc = FirstViewController()
@@ -43,11 +41,7 @@ class NotificationManager {
             //            }
         }
     }
-    
-    
-    
-    
-    
+
     func checkForAuthorization() {
         notificationCenter.getNotificationSettings(completionHandler: { permission in
             switch permission.authorizationStatus  {
@@ -86,9 +80,6 @@ class NotificationManager {
     
     
     func applyNotification() {
-        print("VKL UOUOUOUOU")
-        print(fvc.timePicker.date)
-        print("alarm date \(alarmDate)")
         let content = UNMutableNotificationContent()
         content.title = titleText ?? "No Title"
         content.subtitle = subtitleText ?? "No Subtitle"

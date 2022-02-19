@@ -8,7 +8,9 @@
 import UIKit
 import UserNotifications
 
-class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
+class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, UIPickerViewDataSource, UIPickerViewDelegate {
+    
+    
     let authorizedBackgroundGradientView = UIView()
     let unAuthorizedBackgroundGradientView = UIView()
     let authorizedView = UIView()
@@ -24,13 +26,25 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     let applyButton = UIButton(type: .system)
     let textLabel = UILabel()
     let settingWayButton = UIButton(type: .system)
+    lazy var languagesSet = ["English","German"]
+    let pickerView = UIPickerView()
+    var languageOfApp = MemoryManager().loadlanguage() {
+        didSet {
+            localiztionOfApp()
+            MemoryManager().savelanguage(languageOfApp)
+        }
+    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        pickerView.dataSource = self
+        pickerView.delegate = self
         authorizedViewSetup()
         unAuthorizedViewSetup()
         UNUserNotificationCenter.current().delegate = self
         hideKeyboardWhenTappedAround()
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -77,6 +91,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         titleTextFieldSetup()
         subtitleTextFieldSetup()
         applyButtonSetup()
+        pickerViewSetup()
     }
     
     func unAuthorizedViewSetup() {
@@ -117,9 +132,17 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         unAuthorizedView.addSubview(unAuthorizedBackgroundGradientView)
     }
     
+    func pickerViewSetup() {
+        let picker = pickerView
+        picker.translatesAutoresizingMaskIntoConstraints = false
+        authorizedView.addSubview(picker)
+        picker.centerXAnchor.constraint(equalTo: authorizedView.centerXAnchor).isActive = true
+        picker.centerYAnchor.constraint(equalTo: authorizedView.centerYAnchor, constant: 50).isActive = true
+    }
+    
     func labelSetup() {
         let label = textLabel
-        label.text = String(localized: "notification_label")
+        label.text = String(localized: "notification_label").localized(locale: languageOfApp)
         label.adjustsFontSizeToFitWidth = true
         label.textColor = .white
         label.font = .systemFont(ofSize: 24)
@@ -143,7 +166,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         button.titleLabel?.font = .systemFont(ofSize: 21)
         button.titleLabel?.lineBreakMode = .byWordWrapping
         button.titleLabel?.textAlignment = .center
-        button.setTitle(String(localized: "setup_button"), for: .normal)
+        button.setTitle(String(localized: "setup_button").localized(locale: languageOfApp), for: .normal)
         button.addTarget(self, action: #selector(settingWayButtonTapped), for: .touchUpInside)
         unAuthorizedView.addSubview(button)
     }
@@ -154,7 +177,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = .white
         label.backgroundColor = .clear
-        label.text = String(localized: "switch_label")
+        label.text = String(localized: "switch_label").localized(locale: languageOfApp)
         label.font = .systemFont(ofSize: 24)
         label.adjustsFontSizeToFitWidth = true
         authorizedView.addSubview(label)
@@ -183,7 +206,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         let label = timeLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         label.backgroundColor = .clear
-        label.text = String(localized: "time_label")
+        label.text = String(localized: "time_label").localized(locale: languageOfApp)
         label.font = .systemFont(ofSize: 24)
         label.textColor = .white
         authorizedView.addSubview(label)
@@ -218,7 +241,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         tf.clearButtonMode = .whileEditing
         tf.font = .systemFont(ofSize: 24)
         tf.attributedPlaceholder = NSAttributedString(
-            string: String(localized: "title_placeholder"),
+            string: String(localized: "title_placeholder").localized(locale: languageOfApp),
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 24)]
         )
         tf.textAlignment = .left
@@ -241,7 +264,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         tf.clearButtonMode = .whileEditing
         tf.font = .systemFont(ofSize: 24)
         tf.attributedPlaceholder = NSAttributedString(
-            string: String(localized: "subtitle_placeholder"),
+            string: String(localized: "subtitle_placeholder").localized(locale: languageOfApp),
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 24)]
         )
         tf.textAlignment = .left
@@ -259,7 +282,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     func applyButtonSetup() {
         let button = applyButton
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(String(localized: "apply_button"), for: .normal)
+        button.setTitle(String(localized: "apply_button").localized(locale: languageOfApp), for: .normal)
         button.backgroundColor = .clear
         button.tintColor = .systemGreen
         button.titleLabel?.font = .systemFont(ofSize: 25)
@@ -363,6 +386,41 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         //            print("ВЫКЛ")
         //        }
     }
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        languagesSet.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return languagesSet[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        switch row {
+        case 0:
+            languageOfApp = "en"
+        case 1:
+            languageOfApp = "de"
+        default:
+            print("error")
+        }
+        print("current = \(languageOfApp)")
+    }
+    
+    func localiztionOfApp() {
+        switchLabel.text = "switch_label".localized(locale: languageOfApp)
+        timeLabel.text = "time_label".localized(locale: languageOfApp)
+        titleTextField.placeholder = "title_placeholder".localized(locale: languageOfApp)
+        subtitleTextField.placeholder = "subtitle_placeholder".localized(locale: languageOfApp)
+        applyButton.setTitle("apply_button".localized(locale: languageOfApp), for: .normal)
+        
+    }
+
+    
 }
 
 // in Apply
@@ -376,4 +434,23 @@ extension UIView {
         layer.add(animation, forKey: "shake")
     }
 }
+
+extension String {
+    
+    func localized(locale: String) -> String {
+        if let path = Bundle.main.path(forResource: locale, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return NSLocalizedString(self,
+                                     tableName: "Localizable",
+                                     bundle: bundle,
+                                     value: self,
+                                     comment: self)
+        } else {
+            return NSLocalizedString("", comment: self)
+        }
+    }
+}
+
+
+
 
