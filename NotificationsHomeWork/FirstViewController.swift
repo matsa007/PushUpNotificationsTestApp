@@ -178,39 +178,6 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         ])
     }
     
-    //    private func checkForAuthorization() {
-    //        notificationCenter.getNotificationSettings(completionHandler: { permission in
-    //            switch permission.authorizationStatus  {
-    //            case .authorized:
-    //                DispatchQueue.main.async {
-    //                    self.unAuthorizedView.isHidden = true
-    //                    self.authorizedView.isHidden = false
-    //
-    //                }
-    //                print("*******User granted permission for notification")
-    //            case .denied:
-    //                DispatchQueue.main.async {
-    //                    self.unAuthorizedView.isHidden = false
-    //                    self.authorizedView.isHidden = true
-    //                }
-    //                print("User denied notification permission")
-    //            case .notDetermined:
-    //                DispatchQueue.main.async {
-    //                    self.authorizedView.isHidden = false
-    //                    self.unAuthorizedView.isHidden = true
-    //
-    //                }
-    //                print("Notification permission haven't been asked yet")
-    //            case .provisional:
-    //                print("The application is authorized to post non-interruptive user notifications.")
-    //            case .ephemeral:
-    //                print("The application is temporarily authorized to post notifications. Only available to app clips.")
-    //            @unknown default:
-    //                print("Unknow Status")
-    //            }
-    //        })
-    //    }
-    
     // настройка view лейбы Notification Time
     func timeLabelSetup() {
         let label = timeLabel
@@ -382,9 +349,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     //    MARK: - IBActions
     // функция вызываемая при нажатии на свитч
     @objc func switchButtonTapped() {
-        //        checkForOnOff()
-        let notificationManager = NotificationManager()
-        notificationManager.requestNotificationAuthorization()
+        NotificationManager.requestNotificationAuthorization()
         
         //        let value = switchButton.isOn
         //        let svc = SecondViewController()
@@ -399,7 +364,6 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         //        }
     }
 }
-
 
 // in Apply
 // функция анимации "перетряхивания" объекта

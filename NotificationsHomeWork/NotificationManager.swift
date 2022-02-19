@@ -35,7 +35,7 @@ class NotificationManager {
     
     let fvc = FirstViewController()
     
-    func requestNotificationAuthorization() {
+    static func requestNotificationAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             guard granted else { return }
             //            self.notificationCenter.getNotificationSettings { (settings) in
