@@ -74,9 +74,9 @@
 			children = (
 				4999125127B3E123004ECB2C /* AppDelegate.swift */,
 				4999125327B3E123004ECB2C /* SceneDelegate.swift */,
+				4999125527B3E123004ECB2C /* FirstViewController.swift */,
 				49580EF427BED02D00C3566E /* NotificationManager.swift */,
 				496DE5B027C1145C0094569D /* MemoryManager.swift */,
-				4999125527B3E123004ECB2C /* FirstViewController.swift */,
 				4999125A27B3E123004ECB2C /* Assets.xcassets */,
 				4999125F27B3E123004ECB2C /* Info.plist */,
 				49AF1E4627C0CF2700B60EC6 /* Localizable.strings */,

@@ -8,9 +8,9 @@
 import Foundation
 import UIKit
 
-
 class NotificationManager {
     let notificationCenter = UNUserNotificationCenter.current()
+    
     let defaults = UserDefaults.standard
     var alarmDate = Date()
     var titleText: String? {
@@ -20,7 +20,6 @@ class NotificationManager {
         get {
             defaults.object(forKey: "Title") as? String
         }
-        
     }
     var subtitleText: String? {
         set {
@@ -31,8 +30,7 @@ class NotificationManager {
         }
     }
     
-    let fvc = FirstViewController()
-    
+    // функция запроса разрешения на push уведомления
     static func requestNotificationAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             guard granted else { return }
@@ -42,43 +40,6 @@ class NotificationManager {
         }
     }
 
-    func checkForAuthorization() {
-        notificationCenter.getNotificationSettings(completionHandler: { permission in
-            switch permission.authorizationStatus  {
-            case .authorized:
-                DispatchQueue.main.async {
-                    self.fvc.unAuthorizedView.isHidden = false
-                    self.fvc.authorizedView.isHidden = true
-                    print("1111112222")
-                    
-                }
-                print("*******User granted permission for notification")
-            case .denied:
-                DispatchQueue.main.async {
-                    self.fvc.unAuthorizedView.isHidden = false
-                    self.fvc.authorizedView.isHidden = true
-                }
-                print("User denied notification permission")
-            case .notDetermined:
-                DispatchQueue.main.async {
-                    self.fvc.authorizedView.isHidden = false
-                    self.fvc.unAuthorizedView.isHidden = true
-                    
-                }
-                print("Notification permission haven't been asked yet")
-            case .provisional:
-                print("The application is authorized to post non-interruptive user notifications.")
-            case .ephemeral:
-                print("The application is temporarily authorized to post notifications. Only available to app clips.")
-            @unknown default:
-                print("Unknow Status")
-            }
-        })
-    }
-    
-    
-    
-    
     func applyNotification() {
         let content = UNMutableNotificationContent()
         content.title = titleText ?? "No Title"

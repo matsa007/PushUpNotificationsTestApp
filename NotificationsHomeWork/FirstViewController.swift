@@ -8,8 +8,7 @@
 import UIKit
 import UserNotifications
 
-class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, UIPickerViewDataSource, UIPickerViewDelegate {
-    
+class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
     
     let authorizedBackgroundGradientView = UIView()
     let unAuthorizedBackgroundGradientView = UIView()
@@ -26,7 +25,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
     let applyButton = UIButton(type: .system)
     let textLabel = UILabel()
     let settingWayButton = UIButton(type: .system)
-    lazy var languagesSet = ["English","German"]
+    lazy var languagesSet = ["English","Deutch"]
     let pickerView = UIPickerView()
     var languageOfApp = MemoryManager().loadlanguage() {
         didSet {
@@ -34,104 +33,73 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
             MemoryManager().savelanguage(languageOfApp)
         }
     }
-    
+    var onOff: Bool {
+        get {
+            if switchButton.isOn {
+                return true
+            } else {
+                return false
+            }
+        }
+        set {
+            if newValue == true {
+                self.timeLabel.isHidden = false
+                self.timePicker.isHidden = false
+                self.titleTextField.isHidden = false
+                self.subtitleTextField.isHidden = false
+                self.pickerView.isHidden = false
+                self.applyButton.isHidden = false
+            } else {
+                self.timeLabel.isHidden = true
+                self.timePicker.isHidden = true
+                self.titleTextField.isHidden = true
+                self.subtitleTextField.isHidden = true
+                self.pickerView.isHidden = true
+                self.applyButton.isHidden = true
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         pickerView.dataSource = self
         pickerView.delegate = self
+        UNUserNotificationCenter.current().delegate = self
         authorizedViewSetup()
         unAuthorizedViewSetup()
-        UNUserNotificationCenter.current().delegate = self
         hideKeyboardWhenTappedAround()
         
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        UNUserNotificationCenter.current().getNotificationSettings(completionHandler: { permission in
-            switch permission.authorizationStatus  {
-            case .authorized:
-                DispatchQueue.main.async {
-                    self.unAuthorizedView.isHidden = true
-                    self.authorizedView.isHidden = false
-                }
-                print("User granted permission for notification")
-            case .denied:
-                DispatchQueue.main.async {
-                    self.unAuthorizedView.isHidden = false
-                    self.authorizedView.isHidden = true
-                }
-                print("User denied notification permission")
-            case .notDetermined:
-                DispatchQueue.main.async {
-                    self.authorizedView.isHidden = false
-                    self.unAuthorizedView.isHidden = true
-                }
-                print("Notification permission haven't been asked yet")
-            case .provisional:
-                print("The application is authorized to post non-interruptive user notifications.")
-            case .ephemeral:
-                print("The application is temporarily authorized to post notifications. Only available to app clips.")
-            @unknown default:
-                print("Unknow Status")
-            }
-        })
+        checkForAuthorization()
     }
-    
-    func authorizedViewSetup() {
-        let aView = authorizedView
-        aView.frame = view.bounds
-        view.addSubview(aView)
-        authorisedBackgroundGradientViewSetup()
-        switchLabelSetup()
-        switchButtonSetup()
-        timeLabelSetup()
-        timePickerSetup()
-        titleTextFieldSetup()
-        subtitleTextFieldSetup()
-        applyButtonSetup()
-        pickerViewSetup()
-    }
-    
-    func unAuthorizedViewSetup() {
-        let unView = unAuthorizedView
-        unView.frame = view.bounds
-        view.addSubview(unView)
-        unAuthorisedBackgroundGradientViewSetup()
-        labelSetup()
-        settingWayButtonSetup()
-        
-    }
-    
     //    MARK: - View setup
-    //    настройка фона ввиде градиента
+    //  Функция добавления градиента на задний фон View
+    func gradientForBackgroundView(layer: CAGradientLayer, gradientView: UIView, activeView: UIView) {
+        layer.frame = view.bounds
+        layer.startPoint = CGPoint(x: 1, y: 0)
+        layer.endPoint = CGPoint(x: 0, y: 1)
+        layer.colors = [
+            UIColor(red: 11/255, green: 15/255, blue: 50/255, alpha: 1).cgColor,
+            UIColor(red: 165/255, green: 8/255, blue: 132/255, alpha: 1).cgColor
+        ]
+        layer.shouldRasterize = true
+        gradientView.layer.addSublayer(layer)
+        activeView.addSubview(gradientView)
+    }
+    
+    //    настройка фона ввиде градиента для authorizedView
     func authorisedBackgroundGradientViewSetup() {
-        authorizedGradientLayer.frame = view.bounds
-        authorizedGradientLayer.startPoint = CGPoint(x: 1, y: 0)
-        authorizedGradientLayer.endPoint = CGPoint(x: 0, y: 1)
-        authorizedGradientLayer.colors = [
-            UIColor(red: 11/255, green: 15/255, blue: 50/255, alpha: 1).cgColor,
-            UIColor(red: 165/255, green: 8/255, blue: 132/255, alpha: 1).cgColor
-        ]
-        authorizedGradientLayer.shouldRasterize = true
-        authorizedBackgroundGradientView.layer.addSublayer(authorizedGradientLayer)
-        authorizedView.addSubview(authorizedBackgroundGradientView)
+        gradientForBackgroundView(layer: authorizedGradientLayer, gradientView: authorizedBackgroundGradientView, activeView: authorizedView)
     }
-    
+    //    настройка фона ввиде градиента для unAuthorizedView
     func unAuthorisedBackgroundGradientViewSetup () {
-        unAuthorizedGradientLayer.frame = view.bounds
-        unAuthorizedGradientLayer.startPoint = CGPoint(x: 1, y: 0)
-        unAuthorizedGradientLayer.endPoint = CGPoint(x: 0, y: 1)
-        unAuthorizedGradientLayer.colors = [
-            UIColor(red: 11/255, green: 15/255, blue: 50/255, alpha: 1).cgColor,
-            UIColor(red: 165/255, green: 8/255, blue: 132/255, alpha: 1).cgColor
-        ]
-        unAuthorizedGradientLayer.shouldRasterize = true
-        unAuthorizedBackgroundGradientView.layer.addSublayer(unAuthorizedGradientLayer)
-        unAuthorizedView.addSubview(unAuthorizedBackgroundGradientView)
+        gradientForBackgroundView(layer: unAuthorizedGradientLayer, gradientView: unAuthorizedBackgroundGradientView, activeView: unAuthorizedView)
     }
     
+    // настройка view пикера для выбора языка
     func pickerViewSetup() {
         let picker = pickerView
         picker.translatesAutoresizingMaskIntoConstraints = false
@@ -140,6 +108,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
         picker.centerYAnchor.constraint(equalTo: authorizedView.centerYAnchor, constant: 50).isActive = true
     }
     
+    // настройка view лейбы для unAuthorizedView
     func labelSetup() {
         let label = textLabel
         label.text = String(localized: "notification_label").localized(locale: languageOfApp)
@@ -194,6 +163,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
         let button = switchButton
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(switchButtonTapped), for: .valueChanged)
+        button.isOn = true
         authorizedView.addSubview(button)
         NSLayoutConstraint.activate([
             button.centerYAnchor.constraint(equalTo: switchLabel.centerYAnchor),
@@ -297,6 +267,75 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
         ])
     }
     
+    func authorizedViewSetup() {
+        let aView = authorizedView
+        aView.frame = view.bounds
+        view.addSubview(aView)
+        authorisedBackgroundGradientViewSetup()
+        switchLabelSetup()
+        switchButtonSetup()
+        timeLabelSetup()
+        timePickerSetup()
+        titleTextFieldSetup()
+        subtitleTextFieldSetup()
+        applyButtonSetup()
+        pickerViewSetup()
+    }
+    
+    func unAuthorizedViewSetup() {
+        let unView = unAuthorizedView
+        unView.frame = view.bounds
+        view.addSubview(unView)
+        unAuthorisedBackgroundGradientViewSetup()
+        labelSetup()
+        settingWayButtonSetup()
+        
+    }
+    // функция проверки состояния центра уведомлений и подмена view на его основе
+    func checkForAuthorization() {
+        UNUserNotificationCenter.current().getNotificationSettings(completionHandler: { permission in
+            switch permission.authorizationStatus  {
+            case .authorized:
+                DispatchQueue.main.async {
+                    self.authorizedView.isHidden = false
+                    self.unAuthorizedView.isHidden = true
+                    self.timeLabel.isHidden = false
+                    self.timePicker.isHidden = false
+                    self.titleTextField.isHidden = false
+                    self.subtitleTextField.isHidden = false
+                    self.pickerView.isHidden = false
+                    self.applyButton.isHidden = false
+                }
+                print("User granted permission for notification")
+            case .denied:
+                DispatchQueue.main.async {
+                    self.authorizedView.isHidden = true
+                    self.unAuthorizedView.isHidden = false
+                }
+                print("User denied notification permission")
+            case .notDetermined:
+                DispatchQueue.main.async {
+                    self.authorizedView.isHidden = false
+                    self.switchButton.isOn = true
+                    self.unAuthorizedView.isHidden = true
+                    self.timeLabel.isHidden = true
+                    self.timePicker.isHidden = true
+                    self.titleTextField.isHidden = true
+                    self.subtitleTextField.isHidden = true
+                    self.pickerView.isHidden = true
+                    self.applyButton.isHidden = true
+                }
+                print("Notification permission haven't been asked yet")
+            case .provisional:
+                print("The application is authorized to post non-interruptive user notifications.")
+            case .ephemeral:
+                print("The application is temporarily authorized to post notifications. Only available to app clips.")
+            @unknown default:
+                print("Unknow Status")
+            }
+        })
+    }
+    
     // функция проверки вкл/выкл кнопки свитча и от этого видимость/невидимость остальных элементов
     
     //    private func checkForOnOff() {
@@ -316,7 +355,6 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
     //        }
     //    }
     
-    // функция запроса разрешения на push уведомления
     
     
     @objc func applyButtonTapped() {
@@ -326,7 +364,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
         notificationManger.titleText = titleTextField.text ?? "Title not entered"
         notificationManger.subtitleText = subtitleTextField.text ?? "Subtitle not entered"
         notificationManger.applyNotification()
-//        проверка на пустые поля
+        //        проверка на пустые поля
         if titleTextField.text!.isEmpty {
             titleTextField.shake()
         }
@@ -334,6 +372,8 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
         if subtitleTextField.text!.isEmpty {
             subtitleTextField.shake()
         }
+        
+        
     }
     //  срабатывает перед уведомлением
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
@@ -373,59 +413,18 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, U
     // функция вызываемая при нажатии на свитч
     @objc func switchButtonTapped() {
         NotificationManager.requestNotificationAuthorization()
-        
-        //        let value = switchButton.isOn
-        //        let svc = SecondViewController()
-        //        if value {
-        //            print("ВКЛ")
-        //            requestNotificationAuthorization()
-        //        } else {
-        //            svc.modalPresentationStyle = .fullScreen
-        //            svc.modalTransitionStyle = .flipHorizontal
-        //            present(svc, animated: true, completion: nil)
-        //            print("ВЫКЛ")
-        //        }
-    }
-    
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        languagesSet.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return languagesSet[row]
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        switch row {
-        case 0:
-            languageOfApp = "en"
-        case 1:
-            languageOfApp = "de"
-        default:
-            print("error")
+        checkForAuthorization()
+        print(onOff)
+        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
+            for notification:UNNotification in notifications {
+                print(notification.request.identifier)
+            }
         }
-        print("current = \(languageOfApp)")
     }
-    
-    func localiztionOfApp() {
-        switchLabel.text = "switch_label".localized(locale: languageOfApp)
-        timeLabel.text = "time_label".localized(locale: languageOfApp)
-        titleTextField.placeholder = "title_placeholder".localized(locale: languageOfApp)
-        subtitleTextField.placeholder = "subtitle_placeholder".localized(locale: languageOfApp)
-        applyButton.setTitle("apply_button".localized(locale: languageOfApp), for: .normal)
-        
-    }
-
-    
 }
 
-// in Apply
-// функция анимации "перетряхивания" объекта
 extension UIView {
+    // функция анимации "перетряхивания" объекта
     func shake() {
         let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
         animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
@@ -436,7 +435,6 @@ extension UIView {
 }
 
 extension String {
-    
     func localized(locale: String) -> String {
         if let path = Bundle.main.path(forResource: locale, ofType: "lproj"),
            let bundle = Bundle(path: path) {
@@ -448,6 +446,41 @@ extension String {
         } else {
             return NSLocalizedString("", comment: self)
         }
+    }
+}
+
+extension FirstViewController: UIPickerViewDataSource, UIPickerViewDelegate  {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        languagesSet.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        languagesSet[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        switch row {
+        case 0:
+            languageOfApp = "en"
+        case 1:
+            languageOfApp = "de"
+        default:
+            languageOfApp = "en"
+        }
+        print("current = \(languageOfApp)")
+    }
+    
+    func localiztionOfApp() {
+        switchLabel.text = "switch_label".localized(locale: languageOfApp)
+        timeLabel.text = "time_label".localized(locale: languageOfApp)
+        titleTextField.placeholder = "title_placeholder".localized(locale: languageOfApp)
+        subtitleTextField.placeholder = "subtitle_placeholder".localized(locale: languageOfApp)
+        applyButton.setTitle("apply_button".localized(locale: languageOfApp), for: .normal)
+        
     }
 }
 
