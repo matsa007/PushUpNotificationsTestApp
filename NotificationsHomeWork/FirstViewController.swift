@@ -9,13 +9,12 @@ import UIKit
 import UserNotifications
 
 class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
-    
-    let authorizedBackgroundGradientView = UIView()
-    let unAuthorizedBackgroundGradientView = UIView()
     let authorizedView = UIView()
     let unAuthorizedView = UIView()
     let authorizedGradientLayer = CAGradientLayer()
     let unAuthorizedGradientLayer = CAGradientLayer()
+    let authorizedBackgroundGradientView = UIView()
+    let unAuthorizedBackgroundGradientView = UIView()
     let switchLabel = UILabel()
     let switchButton = UISwitch()
     let timeLabel = UILabel()
@@ -33,32 +32,6 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
             MemoryManager().savelanguage(languageOfApp)
         }
     }
-    var onOff: Bool {
-        get {
-            if switchButton.isOn {
-                return true
-            } else {
-                return false
-            }
-        }
-        set {
-            if newValue == true {
-                self.timeLabel.isHidden = false
-                self.timePicker.isHidden = false
-                self.titleTextField.isHidden = false
-                self.subtitleTextField.isHidden = false
-                self.pickerView.isHidden = false
-                self.applyButton.isHidden = false
-            } else {
-                self.timeLabel.isHidden = true
-                self.timePicker.isHidden = true
-                self.titleTextField.isHidden = true
-                self.subtitleTextField.isHidden = true
-                self.pickerView.isHidden = true
-                self.applyButton.isHidden = true
-            }
-        }
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -68,7 +41,6 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         authorizedViewSetup()
         unAuthorizedViewSetup()
         hideKeyboardWhenTappedAround()
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -76,7 +48,35 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         checkForAuthorization()
     }
     //    MARK: - View setup
-    //  Функция добавления градиента на задний фон View
+    
+    //    настройка authorizedView
+    func authorizedViewSetup() {
+        let aView = authorizedView
+        aView.frame = view.bounds
+        view.addSubview(aView)
+        authorisedBackgroundGradientViewSetup()
+        switchLabelSetup()
+        switchButtonSetup()
+        timeLabelSetup()
+        timePickerSetup()
+        titleTextFieldSetup()
+        subtitleTextFieldSetup()
+        applyButtonSetup()
+        pickerViewSetup()
+    }
+    
+    //    настройка unAuthorizedView
+    func unAuthorizedViewSetup() {
+        let unView = unAuthorizedView
+        unView.frame = view.bounds
+        view.addSubview(unView)
+        unAuthorisedBackgroundGradientViewSetup()
+        labelSetup()
+        settingWayButtonSetup()
+        
+    }
+    
+    //  функция добавления градиента на задний фон
     func gradientForBackgroundView(layer: CAGradientLayer, gradientView: UIView, activeView: UIView) {
         layer.frame = view.bounds
         layer.startPoint = CGPoint(x: 1, y: 0)
@@ -99,16 +99,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         gradientForBackgroundView(layer: unAuthorizedGradientLayer, gradientView: unAuthorizedBackgroundGradientView, activeView: unAuthorizedView)
     }
     
-    // настройка view пикера для выбора языка
-    func pickerViewSetup() {
-        let picker = pickerView
-        picker.translatesAutoresizingMaskIntoConstraints = false
-        authorizedView.addSubview(picker)
-        picker.centerXAnchor.constraint(equalTo: authorizedView.centerXAnchor).isActive = true
-        picker.centerYAnchor.constraint(equalTo: authorizedView.centerYAnchor, constant: 50).isActive = true
-    }
-    
-    // настройка view лейбы для unAuthorizedView
+    // настройка лейбы для unAuthorizedView
     func labelSetup() {
         let label = textLabel
         label.text = String(localized: "notification_label").localized(locale: languageOfApp)
@@ -249,6 +240,16 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         ])
     }
     
+    // настройка пикера для выбора языка
+    func pickerViewSetup() {
+        let picker = pickerView
+        picker.translatesAutoresizingMaskIntoConstraints = false
+        authorizedView.addSubview(picker)
+        picker.centerXAnchor.constraint(equalTo: authorizedView.centerXAnchor).isActive = true
+        picker.centerYAnchor.constraint(equalTo: authorizedView.centerYAnchor, constant: 50).isActive = true
+    }
+    
+    // настройка кнопки добавления уведомления
     func applyButtonSetup() {
         let button = applyButton
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -267,30 +268,6 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         ])
     }
     
-    func authorizedViewSetup() {
-        let aView = authorizedView
-        aView.frame = view.bounds
-        view.addSubview(aView)
-        authorisedBackgroundGradientViewSetup()
-        switchLabelSetup()
-        switchButtonSetup()
-        timeLabelSetup()
-        timePickerSetup()
-        titleTextFieldSetup()
-        subtitleTextFieldSetup()
-        applyButtonSetup()
-        pickerViewSetup()
-    }
-    
-    func unAuthorizedViewSetup() {
-        let unView = unAuthorizedView
-        unView.frame = view.bounds
-        view.addSubview(unView)
-        unAuthorisedBackgroundGradientViewSetup()
-        labelSetup()
-        settingWayButtonSetup()
-        
-    }
     // функция проверки состояния центра уведомлений и подмена view на его основе
     func checkForAuthorization() {
         UNUserNotificationCenter.current().getNotificationSettings(completionHandler: { permission in
@@ -298,6 +275,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
             case .authorized:
                 DispatchQueue.main.async {
                     self.authorizedView.isHidden = false
+                    self.switchButton.isOn = true
                     self.unAuthorizedView.isHidden = true
                     self.timeLabel.isHidden = false
                     self.timePicker.isHidden = false
@@ -316,7 +294,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
             case .notDetermined:
                 DispatchQueue.main.async {
                     self.authorizedView.isHidden = false
-                    self.switchButton.isOn = true
+                    self.switchButton.isOn = false
                     self.unAuthorizedView.isHidden = true
                     self.timeLabel.isHidden = true
                     self.timePicker.isHidden = true
@@ -335,27 +313,37 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
             }
         })
     }
+
+    // жест tap на вьюхе который дергает функцию dismissKeyboard() для убора клавиатуры
+    func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    //    MARK: - IBActions
     
-    // функция проверки вкл/выкл кнопки свитча и от этого видимость/невидимость остальных элементов
-    
-    //    private func checkForOnOff() {
-    //
-    //
-    //
-    //        if switchButton.isOn {
-    //            timeLabel.isHidden = false
-    //            timePicker.isHidden = false
-    //            titleTextField.isHidden = false
-    //            subtitleTextField.isHidden = false
-    //        } else {
-    //            timeLabel.isHidden = true
-    //            timePicker.isHidden = true
-    //            titleTextField.isHidden = true
-    //            subtitleTextField.isHidden = true
-    //        }
-    //    }
-    
-    
+    // функция вызываемая при нажатии на свитч
+    @objc func switchButtonTapped() {
+        NotificationManager.requestNotificationAuthorization()
+        if switchButton.isOn == false {
+            self.timeLabel.isHidden = true
+            self.timePicker.isHidden = true
+            self.titleTextField.isHidden = true
+            self.subtitleTextField.isHidden = true
+            self.pickerView.isHidden = true
+            self.applyButton.isHidden = true
+            UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+            print("Notifications is removed")
+        } else {
+            self.timeLabel.isHidden = false
+            self.timePicker.isHidden = false
+            self.titleTextField.isHidden = false
+            self.subtitleTextField.isHidden = false
+            self.pickerView.isHidden = false
+            self.applyButton.isHidden = false
+            
+        }
+    }
     
     @objc func applyButtonTapped() {
         // включение оповещения
@@ -372,26 +360,8 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
         if subtitleTextField.text!.isEmpty {
             subtitleTextField.shake()
         }
-        
-        
-    }
-    //  срабатывает перед уведомлением
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.sound, .banner, .badge])
-        print(#function )
-    }
-    //  срабатывает при нажатии на уведомление
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        applyButton.tintColor = .red
-        print(#function )
     }
     
-    // жест tap на вьюхе который дергает функцию dismissKeyboard() для убора клавиатуры
-    func hideKeyboardWhenTappedAround() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-    }
     // убирает клавиатуру
     @objc func dismissKeyboard() {
         view.endEditing(true)
@@ -406,50 +376,20 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate {
             UIApplication.shared.open(settingsUrl, completionHandler: nil)
         }
     }
-    
-    
-    
-    //    MARK: - IBActions
-    // функция вызываемая при нажатии на свитч
-    @objc func switchButtonTapped() {
-        NotificationManager.requestNotificationAuthorization()
-        checkForAuthorization()
-        print(onOff)
-        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications) in
-            for notification:UNNotification in notifications {
-                print(notification.request.identifier)
-            }
-        }
-    }
-}
-
-extension UIView {
-    // функция анимации "перетряхивания" объекта
-    func shake() {
-        let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
-        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-        animation.duration = 0.6
-        animation.values = [-20.0, 20.0, -20.0, 20.0, -10.0, 10.0, -5.0, 5.0, 0.0 ]
-        layer.add(animation, forKey: "shake")
-    }
-}
-
-extension String {
-    func localized(locale: String) -> String {
-        if let path = Bundle.main.path(forResource: locale, ofType: "lproj"),
-           let bundle = Bundle(path: path) {
-            return NSLocalizedString(self,
-                                     tableName: "Localizable",
-                                     bundle: bundle,
-                                     value: self,
-                                     comment: self)
-        } else {
-            return NSLocalizedString("", comment: self)
-        }
-    }
 }
 
 extension FirstViewController: UIPickerViewDataSource, UIPickerViewDelegate  {
+    //  срабатывает перед уведомлением
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.sound, .banner, .badge])
+        print(#function )
+    }
+    //  срабатывает при нажатии на уведомление
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        applyButton.tintColor = .red
+        print(#function )
+    }
+    
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         1
     }
@@ -480,9 +420,35 @@ extension FirstViewController: UIPickerViewDataSource, UIPickerViewDelegate  {
         titleTextField.placeholder = "title_placeholder".localized(locale: languageOfApp)
         subtitleTextField.placeholder = "subtitle_placeholder".localized(locale: languageOfApp)
         applyButton.setTitle("apply_button".localized(locale: languageOfApp), for: .normal)
-        
     }
 }
+
+extension UIView {
+    // функция анимации "перетряхивания" объекта
+    func shake() {
+        let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
+        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+        animation.duration = 0.6
+        animation.values = [-20.0, 20.0, -20.0, 20.0, -10.0, 10.0, -5.0, 5.0, 0.0 ]
+        layer.add(animation, forKey: "shake")
+    }
+}
+
+extension String {
+    func localized(locale: String) -> String {
+        if let path = Bundle.main.path(forResource: locale, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return NSLocalizedString(self,
+                                     tableName: "Localizable",
+                                     bundle: bundle,
+                                     value: self,
+                                     comment: self)
+        } else {
+            return NSLocalizedString("", comment: self)
+        }
+    }
+}
+
 
 
 

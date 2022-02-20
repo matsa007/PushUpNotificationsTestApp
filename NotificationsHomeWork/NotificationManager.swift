@@ -10,7 +10,6 @@ import UIKit
 
 class NotificationManager {
     let notificationCenter = UNUserNotificationCenter.current()
-    
     let defaults = UserDefaults.standard
     var alarmDate = Date()
     var titleText: String? {
@@ -39,7 +38,7 @@ class NotificationManager {
             //            }
         }
     }
-
+    // функция включения уведомления
     func applyNotification() {
         let content = UNMutableNotificationContent()
         content.title = titleText ?? "No Title"
